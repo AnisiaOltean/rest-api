@@ -6,15 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/entities/user.entity';
 import { CatsModule } from './cats/cats.module';
 import { Cat } from './cats/entities/cat.entity';
+import { dataSourceOptions } from 'db/data-source';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'my_database.db',
-      entities: [User, Cat],
-      synchronize: true  
-    }),
+    TypeOrmModule.forRoot(dataSourceOptions),
     UsersModule,
     CatsModule
   ],

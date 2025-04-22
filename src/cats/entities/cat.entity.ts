@@ -1,4 +1,3 @@
-import { TypeOrmModule } from "@nestjs/typeorm";
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
 import { User } from "src/users/entities/user.entity";
 
@@ -12,6 +11,9 @@ export class Cat {
 
     @Column()
     breed: string;
+
+    @Column({default: false})
+    isFed: boolean;
 
     @ManyToOne(() => User, (user) => user.cats)
     owner: User;
