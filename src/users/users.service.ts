@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -19,12 +19,22 @@ export class UsersService {
     return this.userRepository.save(user);
   }
 
-  findAll() {
-    return this.userRepository.find();
+  async findAll() {
+    return await this.userRepository.find();
   }
 
-  findOne(id: number) {
-    return this.userRepository.findOne({where: {id: id}});
+  async findOne(id: number) {
+    const foundUser: User | null = await this.userRepository.findOne({where: {id: id}});
+
+    if(!foundUser) throw new NotFoundException("User not found!");
+    return foundUser;
+  }
+
+  async findByEmail(email: string) {
+    const foundUser: User | null = await this.userRepository.findOne({where: {email: email}});
+
+    if(!foundUser) throw new NotFoundException("User not found!");
+    return foundUser;
   }
 
   async findCatsForUser(id: number){
@@ -34,7 +44,7 @@ export class UsersService {
     });
   
     if (!userWithCats) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
   
     return userWithCats.cats;

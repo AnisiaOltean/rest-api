@@ -16,7 +16,7 @@ export class CatsService {
   async create(createCatDto: CreateCatDto) {
     const user: User | null = await this.userRepository.findOneBy({id: createCatDto.ownerId});
 
-    if(!user) throw new Error("User not found!");
+    if(!user) throw new NotFoundException("User with given id not found!");
 
 
     const cat = this.catRepository.create({
@@ -28,18 +28,21 @@ export class CatsService {
     return this.catRepository.save(cat);
   }
 
-  findAll() {
-    return this.catRepository.find();
+  async findAll() {
+    return await this.catRepository.find();
   }
 
-  findOne(id: number) {
-    return this.catRepository.findOne({where: {id: id}});
+  async findOne(id: number) {
+    const foundCat: Cat | null = await this.catRepository.findOne({where: {id: id}});
+
+    if(!foundCat) throw new NotFoundException("Cat not found!");
+    return foundCat;
   }
 
   async update(id: number, updateCatDto: UpdateCatDto) {
     let catToUpdate = await this.catRepository.findOne({where: {id: id}});
 
-    if(!catToUpdate) return new NotFoundException('Cat with given id not found!');
+    if(!catToUpdate) throw new NotFoundException('Cat with given id not found!');
 
     await this.catRepository.update(id, updateCatDto);
     return this.catRepository.findOne({ where: { id } });

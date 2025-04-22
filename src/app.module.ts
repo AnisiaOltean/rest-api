@@ -7,12 +7,15 @@ import { User } from './users/entities/user.entity';
 import { CatsModule } from './cats/cats.module';
 import { Cat } from './cats/entities/cat.entity';
 import { dataSourceOptions } from 'db/data-source';
+import { AuthController } from './auth/auth.controller';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(dataSourceOptions),
     UsersModule,
-    CatsModule
+    CatsModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
