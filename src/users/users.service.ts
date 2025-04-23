@@ -30,6 +30,14 @@ export class UsersService {
     return foundUser;
   }
 
+  async delete(id: number) {
+    const foundUser: User | null = await this.userRepository.findOne({where: {id: id}});
+
+    if(!foundUser) throw new NotFoundException("User not found!");
+    return await this.userRepository.delete(id);
+  }
+
+
   async findByEmail(email: string) {
     const foundUser: User | null = await this.userRepository.findOne({where: {email: email}});
 

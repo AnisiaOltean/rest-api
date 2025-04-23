@@ -1,21 +1,33 @@
-import { Controller, Post, Request, Get } from '@nestjs/common';
+import { Controller, Post, Request, Get, Body, ValidationPipe } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { RegisterDto } from './dto/RegisterDto';
+import { UsersService } from 'src/users/users.service';
+import { LocalAuthGuard } from './local-auth.guard';
+
 @Controller('auth')
 export class AuthController {
-    constructor(private authService: AuthService) {}
+    constructor(private authService: AuthService,
+    ) {}
 
-    @UseGuards(AuthGuard('local'))
+    @Post('/register')
+    register(@Body(ValidationPipe) registerDto: RegisterDto){
+        return this.authService.register(registerDto.email, registerDto.password);
+    }
+
+    @UseGuards(LocalAuthGuard)
     @Post('/login')
     login(@Request() request){
+        console.log(request.user);  // from validate in local.strategy.ts
         return this.authService.login(request.user);
     }
 
     @UseGuards(JwtAuthGuard)
     @Get('profile')
-    getProfile(@Request() req) {
+    getProfile(@Request() request) {
+        console.log(request.user);
         return "I am protected route!";
     }
 }
