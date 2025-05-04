@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
+import { HttpException, HttpStatus } from '@nestjs/common';
+
 
 @Injectable()
 export class AuthService {
@@ -34,5 +36,14 @@ export class AuthService {
         return {
           access_token: this.jwtService.sign(payload),
         };
+    }
+
+    async verifyJwt(jwt: string): Promise<{ exp: number }> {
+      try {
+        const { exp } = await this.jwtService.verifyAsync(jwt);
+        return { exp };
+      } catch (error) {
+        throw new HttpException('Invalid JWT', HttpStatus.UNAUTHORIZED);
       }
+    }
 }
