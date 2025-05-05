@@ -17,4 +17,7 @@ export class Cat {
 
     @ManyToOne(() => User, (user) => user.cats)
     owner: User;
+
+    @Column()
+    ownerId: number;
 }

@@ -62,4 +62,8 @@ export class CatsService {
     await this.catRepository.update(id, updateCatDto);
     return this.catRepository.findOne({ where: { id } });
   }
+
+  async delete(id: number){
+    return await this.catRepository.delete(id);
+  }
 }
