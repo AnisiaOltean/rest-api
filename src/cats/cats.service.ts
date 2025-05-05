@@ -22,7 +22,8 @@ export class CatsService {
     const cat = this.catRepository.create({
       name: createCatDto.name,
       breed: createCatDto.breed,
-      owner: user
+      owner: user,
+      isFed: createCatDto.isFed
     });
 
     return this.catRepository.save(cat);
@@ -30,6 +31,20 @@ export class CatsService {
 
   async findAll() {
     return await this.catRepository.find();
+  }
+
+  async findAllByUser(ownerId: number) {
+    const foundUser = await this.userRepository.findOne({where: {id: ownerId}});
+    if(!foundUser) throw new NotFoundException("User not found!");
+
+    return this.catRepository.find({
+      where: {
+        owner: {
+          id: ownerId
+        }
+      },
+      relations: ['owner'] // Include owner in case it's needed
+    });
   }
 
   async findOne(id: number) {

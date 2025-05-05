@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, ParseIntPipe, ValidationPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query, ParseIntPipe, ValidationPipe, UseGuards } from '@nestjs/common';
 import { CatsService } from './cats.service';
 import { CreateCatDto } from './dto/create-cat.dto';
 import { UpdateCatDto } from './dto/update-cat.dto';
@@ -15,8 +15,8 @@ export class CatsController {
   }
 
   @Get()
-  findAll() {
-    return this.catsService.findAll();
+  findAllByUser(@Query('ownerId') ownerId: number){
+    return this.catsService.findAllByUser(ownerId);
   }
 
   @Get(':id')
