@@ -32,4 +32,9 @@ export class UsersController {
   getUserCats(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findCatsForUser(id);
   }
+
+  @Delete(':id')
+  deleteUser(@Param('id', ParseIntPipe) id: number){
+    return this.usersService.delete(id);
+  }
 }
