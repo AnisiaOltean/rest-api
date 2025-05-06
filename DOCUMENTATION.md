@@ -1,7 +1,38 @@
 # NestJS Proof of Concept app
 ### This application is a proof of concept app that uses NestJS framework to build a REST API that provides CRUD Controllers for two entities: users and cats.
 ### A sqlite3 database along with TypeORM are integrated to persist data long term.
+### The app provides the following features:
+- authentication (using json web tokens JWT)
+- CRUD operations for the two entities (users, cats)
+- sends email reminders every day at 10 AM so that users don't forget to feed their cats 
 
+### How does NestJS work?
+NestJS uses three main concepts in its architecture: modules, services and controllers. 
+- Modules are classes annotated with `@Module()` decorator which help Nest organize the app structure. This decorator accepts an object with properties that describe it:
+  - providers: to specify which providers are instantiated by the Nest injector and shared at least across the current module
+  - controllers: which controllers should be instantiated
+  - imports: a list of imported modules that export the providers needed in this module
+  - exports: providers that are provided by this module and should be available in other modules which import this module
+- Controllers are the classes responsible for handling incoming requests using a routing mechanism. For instance `@Controller('users')` specifices that this controller class will handle incoming requests on the /users route
+- Providers are Nest classes which can be injected as dependencies. An example of this is the constructor inside the UserService:
+ ```  
+  constructor(
+    @InjectRepository(User) private userRepository: Repository<User>
+  ){}
+```
+This constructor tells NestJS, which uses the Dependency Injection design pattern, to instantiate the useRepository as a provider inside the service. 
+An example of an entire module is this:
+```
+@Module({
+  imports: [TypeOrmModule.forFeature([User])],
+  controllers: [UsersController],
+  providers: [UsersService],
+  exports: [UsersService]
+})
+export class UsersModule {}
+```
+In here, we know that NestJS will have to inject the TypeORM module at runtime because it is used as dependency inside the service, specified in the constructor`constructor(@InjectRepository(User) private userRepository: Repository<User>){}`. Also, the UsersController class will be also instantiated as this module's controller to handle the HTTP requests and it provides the UsersService so that NestJS knows it will be used inside this module. Finally, UsersSerice is also exported because it will be shared with the CatsModule in `imports: [ UsersModule],` and the MailerModule. 
+It is important to know that modules in NestJS are singletons by default, so the same UsersService instance will be shared across both catsModule and MailerModule. 
 ### Features
 1. Authentication
 - Defined in the auth module, where AuthService deals with the business logic and AuthController exposes the /login and /register endpoints. For authentication, the Passport library (@nestjs/passport) is used which abstracts the logic needed for veryfing the user's credentials using the local-startegy; additionally, we have also extended the authentication logic to include JWT, also done by the jwt-strategy.
@@ -181,7 +212,55 @@ AuthController
     - async findAll()
     - async findOne(id: number)
     -  async update(id: number, updateCatDto: UpdateCatDto)
-The idea here is to allow users to use this PoC app as a pet management application; each user can register its cats and update their properties (isFed - to check if it was fed today)
+The idea here is to allow users to use this PoC app as a pet management application; each user can register its cats and update their properties (like lastFed - the last time the cat was fed)
+3. Email notifications
+Notifications are send every day at 10 AM to remind users to feed their cats if they haven't done so already
+This feature was implemented using task scheduling from `@nestjs/schedule`. The scheduler itself is a module that uses the SchedulerSerice service. This service is a simple service that calls the sendMails() method inside another MailerService class. Here, again, SchedulerModule has to import MailerModule and MailerModule needs to export MailerService so that nestJS can inject the dependencies.
+```
+scheduler.service.ts
+@Injectable()
+export class SchedulerService {
+    constructor(private readonly mailerService: MailerService){}
+
+    @Cron(CronExpression.EVERY_DAY_AT_10AM)
+    async someMethod(){
+        console.log('sending mail....');
+        this.mailerService.sendEmails();
+    }
+}
+```
+MailerService uses UserService so that it can send emails to the users registered in the application, but also ConfigService to read environment variables. In our case, we are using the SMTP mail transport protocol for gmail (smtp.gmail.com) on port 587. The sendEmails() function first filters only the users that have gmail mail accounts and then sends a simple mail with a subject and a text.
+```
+mailer.service.ts
+@Injectable()
+export class MailerService {
+    constructor(
+        private readonly configService: ConfigService,
+        private readonly usersService: UsersService
+    ){}
+
+    async sendEmails(){
+        const allUsers = await this.usersService.findAll();
+        const allGmail = allUsers.map(user => user.email).filter(mail => mail.includes('@gmail.com'));
+        console.log(allGmail);
+
+        const transport = this.mailTransport();
+        const options: nodemailer.SendMailOptions = {
+            from: this.configService.get<string>('EMAIL_USER'),
+            to: allGmail,
+            subject: 'Cat Management App',
+            text: `This is a reminder for to feed your cats today, if you have not done it already :)`,
+        }
+
+        try{
+            await transport.sendMail(options);
+            console.log('Emails sent successfully!');
+        }catch(error){
+            throw new Error('Error sending mails!');
+        }
+    }
+}
+```
 
 
 ## Controllers

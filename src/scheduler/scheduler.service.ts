@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { MailerService } from 'src/mailer/mailer.service';
-import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class SchedulerService {
