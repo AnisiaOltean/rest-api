@@ -12,8 +12,8 @@ export class Cat {
     @Column()
     breed: string;
 
-    @Column({default: false})
-    isFed: boolean;
+    @Column({nullable: true})
+    lastFed: string;
 
     @ManyToOne(() => User, (user) => user.cats)
     owner: User;

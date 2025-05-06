@@ -23,7 +23,7 @@ export class CatsService {
       name: createCatDto.name,
       breed: createCatDto.breed,
       owner: user,
-      isFed: createCatDto.isFed
+      lastFed: createCatDto.lastFed
     });
 
     return this.catRepository.save(cat);

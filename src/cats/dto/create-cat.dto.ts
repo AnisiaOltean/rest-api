@@ -10,6 +10,6 @@ export class CreateCatDto {
     @IsNumber()
     ownerId: number;
 
-    @IsBoolean()
-    isFed: boolean;
+    @IsString()
+    lastFed: string;
 }
