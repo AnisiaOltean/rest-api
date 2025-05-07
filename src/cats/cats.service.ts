@@ -43,7 +43,7 @@ export class CatsService {
           id: ownerId
         }
       },
-      relations: ['owner'] // Include owner in case it's needed
+      relations: ['owner']
     });
   }
 
