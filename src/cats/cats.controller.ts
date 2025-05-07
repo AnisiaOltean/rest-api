@@ -26,7 +26,7 @@ export class CatsController {
 
   @Patch(':id')
   update(@Param('id', ParseIntPipe) id: number, @Body(ValidationPipe) updateCatDto: UpdateCatDto) {
-    return this.catsService.update(+id, updateCatDto);
+    return this.catsService.update(id, updateCatDto);
   }
 
   @Delete(':id')

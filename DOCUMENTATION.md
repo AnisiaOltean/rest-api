@@ -185,7 +185,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 }
 ```
-- the AuthController then makes use of the JwrAuthGuard `export class JwtAuthGuard extends AuthGuard('jwt') {}` to control the secured acces on the API route by automatically invoking out jwt-strategy defined above
+- the AuthController then makes use of the JwtAuthGuard `export class JwtAuthGuard extends AuthGuard('jwt') {}` to control the secured access on the API route by automatically invoking out jwt-strategy defined above
 ```
 AuthController 
 
@@ -262,6 +262,30 @@ export class MailerService {
 }
 ```
 
+### We have also integrated the powerful built-in validation pipes `ValidationPipe` and `ParseIntPipe` to automatically validate incoming requests into the controllers. For instance, `Validation Pipe` enforces validation rules for the client payloads by checking against rules defined in the dto class declaration. For instance, the CreateUserDto class below uses the isEmail and isString decorators to ensure that the email field complies to general structure of how an email address should look like.
+```
+export class CreateUserDto {
+    @IsEmail()
+    email: string;
+
+    @IsString()
+    password: string;
+}
+``` 
+### These validation rules are enforced upon the body of incoming requests for the /users POST endpoint, where `@Body(ValidationPipe)` ensures that users with incorrect data types are not created by returning a 400 Bad Request response with a suggestive error message such as `"email must be an email"`.
+```
+  @Post()
+  create(@Body(ValidationPipe) createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
+```
+### Lastly, `ParseIntPipe` is employed at the parameter level within route handlers to ensure that the `:id` string parameter is converted to the number format so that queries to the database do not fail. An example of this behaviour is capured in the findOne function below, where the GET request on the users/:id should return the user with the given id. Because route parameters are treated as strings by default, ParseIntPipe allows for the automatic conversion to a number.
+ ```
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.findOne(id);
+  }
+``` 
 
 ## Controllers
 - `nest g controller [resource]`
