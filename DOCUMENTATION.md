@@ -273,6 +273,8 @@ export class MailerService {
     }
 }
 ```
+An example of email is depicetd in the image below:
+![Email example](src/scheduler/email-example.png)
 
 We have also integrated the powerful built-in validation pipes `ValidationPipe` and `ParseIntPipe` to automatically validate incoming requests into the controllers. For instance, `Validation Pipe` enforces validation rules for the client payloads by checking against rules defined in the dto class declaration. For instance, the CreateUserDto class below uses the isEmail and isString decorators to ensure that the email field complies to general structure of how an email address should look like.
 ```
@@ -384,24 +386,6 @@ bootstrap();
 - `npm run migration:generate -- db/migrations/new-migration-name`
 ### And then apply the changes
 - `npm run migration:run`
-
-## We have defined entities for users and cats using TypeORM. We have used the common `@Column()` annotations, along with the `@OneToMany()` and `@ManyToOne()` for defining the one-to-many relationship between users-cats. TypeORM uses the configurations defined inside db/data-source.ts and generates the migration files inside the db/migrations folder.
-```
-@Entity()
-export class User {
-    @PrimaryGeneratedColumn()
-    id: number 
-
-    @Column()
-    email: string 
-
-    @Column()
-    password: string 
-
-    @OneToMany(() => Cat, (cat) => cat.owner)
-    cats: Cat[];
-}
-```
 
 ## Run app
 - `npm run start:dev` or `npm start`
