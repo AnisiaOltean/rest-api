@@ -359,6 +359,17 @@ bootstrap();
 
 ```
 
+## How to use this app
+- clone the repository at url [https://github.com/AnisiaOltean/rest-api]
+- for the backend NestJS app:
+ - run the command `cd rest-api`
+ - and then run `npm install` to install the project dependencies
+ - start the server: `npm run start:dev`
+- for the frontend app, similarly:
+ - run the command `cd frontend`
+ - run `npm install`
+ - and then start the app: `npm run dev`
+
 ## Controllers
 - `nest g controller [resource]`
 ## Services 
