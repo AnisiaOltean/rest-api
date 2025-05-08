@@ -385,5 +385,23 @@ bootstrap();
 ### And then apply the changes
 - `npm run migration:run`
 
+## We have defined entities for users and cats using TypeORM. We have used the common `@Column()` annotations, along with the `@OneToMany()` and `@ManyToOne()` for defining the one-to-many relationship between users-cats. TypeORM uses the configurations defined inside db/data-source.ts and generates the migration files inside the db/migrations folder.
+```
+@Entity()
+export class User {
+    @PrimaryGeneratedColumn()
+    id: number 
+
+    @Column()
+    email: string 
+
+    @Column()
+    password: string 
+
+    @OneToMany(() => Cat, (cat) => cat.owner)
+    cats: Cat[];
+}
+```
+
 ## Run app
 - `npm run start:dev` or `npm start`
