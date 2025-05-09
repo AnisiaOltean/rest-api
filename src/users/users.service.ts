@@ -11,7 +11,7 @@ export class UsersService {
   ){}
 
 
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
     const user: User = new User();
     user.email = createUserDto.email;
     user.password = createUserDto.password; 

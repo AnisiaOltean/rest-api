@@ -22,7 +22,7 @@ export class AuthService {
         return null;
     }
 
-    register(email: string, password: string){
+    async register(email: string, password: string){
       const userDto: CreateUserDto = {
         email: email,
         password: password
