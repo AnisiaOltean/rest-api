@@ -48,7 +48,7 @@ export class UsersService {
   async findCatsForUser(id: number){
     const userWithCats = await this.userRepository.findOne({
       where: { id: id},
-      relations: ['cats'], // this tells TypeORM to fetch related cats
+      relations: ['cats'],
     });
   
     if (!userWithCats) {

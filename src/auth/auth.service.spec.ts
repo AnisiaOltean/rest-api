@@ -10,7 +10,7 @@ describe('AuthService', () => {
   let jwtService: JwtService;
 
   const mockUserRepository = {
-
+    
   };
   
   beforeEach(async () => {
