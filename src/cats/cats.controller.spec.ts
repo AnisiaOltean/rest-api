@@ -51,7 +51,6 @@ describe('CatsController', () => {
       name: "Regi",
       breed: "Birmanese",
       lastFed: "2024-05-08",
-      ownerId: mockUser.id,
       owner: mockUser
     }
     
@@ -68,7 +67,6 @@ describe('CatsController', () => {
       name: "Regi",
       breed: "Birmanese",
       lastFed: "2024-05-08",
-      ownerId: mockUser.id,
       owner: mockUser
     }
 
@@ -86,7 +84,6 @@ describe('CatsController', () => {
       name: "Regi",
       breed: "Birmanese",
       lastFed: "2024-05-08",
-      ownerId: mockUser.id,
       owner: mockUser
     }
 
@@ -110,7 +107,6 @@ describe('CatsController', () => {
       name: "Regi",
       breed: "Birmanese",
       lastFed: "2024-05-08",
-      ownerId: mockUser.id,
       owner: mockUser
     }
 
@@ -119,7 +115,6 @@ describe('CatsController', () => {
       name: "Regii",
       breed: "Birmanesei",
       lastFed: "2024-05-08",
-      ownerId: mockUser.id,
       owner: mockUser
     }
 

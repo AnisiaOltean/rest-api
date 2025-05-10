@@ -318,9 +318,6 @@ export class Cat {
 
     @ManyToOne(() => User, (user) => user.cats)
     owner: User;
-
-    @Column()
-    ownerId: number;
 }
 ```
 And then let NestJS know about it by inserting it into the 'entities' TypeORM.forRoot() in AppModule. In this case, we have defined the object dataSourceObject that also provides the path to the generated migrations.   

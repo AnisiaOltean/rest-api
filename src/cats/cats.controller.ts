@@ -16,6 +16,7 @@ export class CatsController {
 
   @Get()
   findAllByUser(@Request() request){
+    console.log(request.user.id);
     return this.catsService.findAllByUser(+request.user.id);
   }
 

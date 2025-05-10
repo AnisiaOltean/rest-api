@@ -59,7 +59,7 @@ export class CatsService {
 
     if(!catToUpdate) throw new NotFoundException('Cat with given id not found!');
 
-    await this.catRepository.update(id, updateCatDto);
+    await this.catRepository.update(id, {name: updateCatDto.name, breed: updateCatDto.breed, lastFed: updateCatDto.lastFed});
     return this.catRepository.findOne({ where: { id } });
   }
 
