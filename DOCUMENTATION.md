@@ -29,7 +29,7 @@ NestJS uses three main concepts in its architecture: modules, services and contr
     @InjectRepository(User) private userRepository: Repository<User>
   ){}
 ```
-This constructor tells NestJS, which uses the Dependency Injection design pattern, to instantiate the useRepository as a provider inside the service. Controllers and Providers are scoped by the module they are declared in. Modules and their classes (Controllers and Providers) form a graph that determines how Nest performs Dependency Injection (DI).
+This constructor tells NestJS, which uses the Dependency Injection design pattern, to instantiate the userRepository as a provider inside the service. Controllers and Providers are scoped by the module they are declared in. Modules and their classes (Controllers and Providers) form a graph that determines how Nest performs Dependency Injection (DI).
 An example of an entire module is this:
 ```
 @Module({
@@ -224,6 +224,18 @@ AuthController
     - async update(id: number, updateCatDto: UpdateCatDto)
     - findAllByUser(@Request() request)
     - async delete(id: number)
+
+These operations are provided to the React client through the controllers which call the underlying service classes. Our services use `Repository` class from typeORM which provides abstractions over basic methods like save, find, update and delete which allow us to not write the database queries by hand. A simple example of this is the create method in the users.service.ts class which uses the typeORM repository save() method to insert the new record in the database. This method is invoked in both the UsersController and the AuthController since both controllers have the AuthService as provider.  
+```
+  async create(createUserDto: CreateUserDto) {
+    const user: User = new User();
+    user.email = createUserDto.email;
+    user.password = createUserDto.password; 
+
+    return this.userRepository.save(user);
+  }
+```
+
 > The idea here is to allow users to use this PoC app as a pet management application; each user can register its cats and update their properties (like lastFed - the last time the cat was fed)
 3. Email notifications
 Notifications are send every day at 10 AM to remind users to feed their cats if they haven't done so already.
