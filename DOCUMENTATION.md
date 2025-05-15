@@ -42,6 +42,17 @@ export class UsersModule {}
 ```
 In here, we know that NestJS will have to inject the TypeORM module at runtime because it is used as dependency inside the service, specified in the constructor`constructor(@InjectRepository(User) private userRepository: Repository<User>){}`. Also, the UsersController class will be also instantiated as this module's controller to handle the HTTP requests and it provides the UsersService so that NestJS knows it will be used inside this module. Finally, UsersSerice is also exported because it will be shared with the CatsModule in `imports: [ UsersModule],` and the MailerModule. 
 It is important to know that modules in NestJS are singletons by default, so the same UsersService instance will be shared across both catsModule and MailerModule. 
+
+The app provides folder structures for each feature. Each one of this is found inside `src/` folder as follows:
+- `auth/` folder: auth.controller.ts, auth.service.ts, auth.module.ts (+ some additional files for defining the passport strategies)
+- `users/` folder: users.controller.ts, users.service.ts, users.module.ts
+- `cats/` folder: cats.controller.ts, cats.service.ts, cats.module.ts
+- `mailer/` folder: mailer.controller.ts, mailer.service.ts, mailer.module.ts
+- `scheduler/` folder: scheduler.service.ts, scheduler.module.ts
+
+Some additional files such as dtos or entities used by our endpoints are defined inside `entities/` and `dto/` folders.
+The main application's service and module are inside the src/ folder; a controller is also defined but not used in the app.
+
 ### Features
 1. Authentication
 - Defined in the auth module, where AuthService deals with the business logic and AuthController exposes the /login and /register endpoints. For authentication, the Passport library (@nestjs/passport) is used which abstracts the logic needed for veryfing the user's credentials using the local-startegy; additionally, we have also extended the authentication logic to include JWT, also done by the jwt-strategy.
@@ -49,6 +60,8 @@ It is important to know that modules in NestJS are singletons by default, so the
 - it is also important to know that whatever validate() returns will be injected into the @Request request.user in our route handlers   
 - users authenticate in the app using an email and a passport; we are using the local-strategy in passport to verify the user's credentials by defining a validateUser method inside the AuthService class:
 ```
+auth.service.ts 
+
 @Injectable()
 export class AuthService {
     constructor(
@@ -127,7 +140,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 - Guards are then used to check whether a client request will be handled by our route or not; in the /login route, the local AuthGuard will just check if the provided email and passports are valid user credentials and if so, return a JWT (json web token) 
 - in the case of invalid credentials a 401 Unauthorized response is generated
  ```
-AuthController
+auth.controller.ts
 
 @Controller('auth')
 export class AuthController {
@@ -149,6 +162,7 @@ export class AuthController {
 ```
 - the LocalAuthGuard defined extends the built-in local AuthGuard provided by passport
 ```
+local-auth.guard.ts
 @Injectable()
 export class LocalAuthGuard extends AuthGuard('local') {}
 ```
@@ -156,6 +170,8 @@ export class LocalAuthGuard extends AuthGuard('local') {}
 - after authentication is complete, the JWT will have to be sent as Bearer token in the authorization headers for future requests
 - JWT authentication works similarly, but uses a different strategy called jwt-strategy in passport; to implement that, the login function in AuthService returns a token by using the JwtService .sign() method in which we will provide the users id as subject (sub) claim:
 ```
+auth.service.ts 
+
     async login(user: any) {
         const payload = { email: user.email, sub: user.id };
         return {
@@ -165,6 +181,8 @@ export class LocalAuthGuard extends AuthGuard('local') {}
 ```
 - the JWT module is registered in the AuthModule import statement by also specifying the secret key used by the signature part of jwt (and the expiration time)
 ```
+auth.module.ts 
+
 @Module({
     imports: [
         UsersModule, 
@@ -199,7 +217,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 ```
 - the AuthController then makes use of the JwtAuthGuard `export class JwtAuthGuard extends AuthGuard('jwt') {}` to control the secured access on the API route by automatically invoking out jwt-strategy defined above
 ```
-AuthController 
+auth.controller.ts 
 
     @UseGuards(JwtAuthGuard)
     @Get('profile')
@@ -227,6 +245,7 @@ AuthController
 
 These operations are provided to the React client through the controllers which call the underlying service classes. Our services use `Repository` class from typeORM which provides abstractions over basic methods like save, find, update and delete which allow us to not write the database queries by hand. A simple example of this is the create method in the users.service.ts class which uses the typeORM repository save() method to insert the new record in the database. This method is invoked in both the UsersController and the AuthController since both controllers have the AuthService as provider.  
 ```
+users.service.ts
   async create(createUserDto: CreateUserDto) {
     const user: User = new User();
     user.email = createUserDto.email;
@@ -290,6 +309,8 @@ An example of email is depicetd in the image below:
 
 We have also integrated the powerful built-in validation pipes `ValidationPipe` and `ParseIntPipe` to automatically validate incoming requests into the controllers. For instance, `Validation Pipe` enforces validation rules for the client payloads by checking against rules defined in the dto class declaration. For instance, the CreateUserDto class below uses the isEmail and isString decorators to ensure that the email field complies to general structure of how an email address should look like.
 ```
+users/dto/create-user.dto.ts 
+
 export class CreateUserDto {
     @IsEmail()
     email: string;
@@ -300,6 +321,8 @@ export class CreateUserDto {
 ``` 
 These validation rules are enforced upon the body of incoming requests for the /users POST endpoint, where `@Body(ValidationPipe)` ensures that users with incorrect data types are not created by returning a 400 Bad Request response with a suggestive error message such as `"email must be an email"`.
 ```
+users.controller.ts 
+
   @Post()
   create(@Body(ValidationPipe) createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
@@ -307,6 +330,8 @@ These validation rules are enforced upon the body of incoming requests for the /
 ```
 Lastly, `ParseIntPipe` is employed at the parameter level within route handlers to ensure that the `:id` string parameter is converted to the number format so that queries to the database do not fail. An example of this behaviour is capured in the findOne function below, where the GET request on the users/:id should return the user with the given id. Because route parameters are treated as strings by default, ParseIntPipe allows for the automatic conversion to a number.
  ```
+ users.controller.ts 
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findOne(id);
@@ -314,6 +339,7 @@ Lastly, `ParseIntPipe` is employed at the parameter level within route handlers 
 ``` 
 For persistent data storage, TypeORM was integrated into NestJS using the `@nestjs/typeorm` package as an object relational mapper for a SQLite database. TypeORM uses the repository design pattern, so in order to get repositories for each entity in the app, we have to use special `@Entity()` decirators for defining our main entities (users and cats):
 ```
+cats/entities/cat.entity.ts
 @Entity()
 export class Cat {
     @PrimaryGeneratedColumn()
@@ -334,6 +360,8 @@ export class Cat {
 ```
 And then let NestJS know about it by inserting it into the 'entities' TypeORM.forRoot() in AppModule. In this case, we have defined the object dataSourceObject that also provides the path to the generated migrations.   
 ```
+src/db/data-source.ts 
+
 export const dataSourceOptions: DataSourceOptions = {
     type: 'sqlite',
     database: 'my_database.db',
@@ -343,6 +371,8 @@ export const dataSourceOptions: DataSourceOptions = {
 ```
 The AppModule is defined as follows:
 ```
+src/app.module.ts 
+
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -361,6 +391,8 @@ export class AppModule {}
 ```
 and is used inside the main.ts file, the entry file for our application. It contains the bootstrap() function which creates the `app` application object using NestFactory and then starts listening to inbound HTTP requests with `app.listen()`.
 ```
+src/main.ts 
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
