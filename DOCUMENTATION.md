@@ -6,7 +6,7 @@
 - CRUD operations for the two entities (users, cats)
 - sends email reminders every day at 10 AM so that users don't forget to feed their cats 
 ### What is NestJS?
-NestJS is a framework used for building efficient and scalable server-side applications in Node.js. Architecturally, it is inspired from Angular by using modules to group related controllers, providers (services), and imports. The architecture is also layered, providing controllers (routes) which communicate to service layers for business logic and then finally the data acess layer (to access persistent storage). At its core, the Inversion of Control (IoC) principle allows for the framework to take care of injecting and instantiating dependencies inside our classes so we don't have to do it manually. This approach enables building applications in a modular and loosely coupled design. IoC is achieved in NestJS by using Dependency Injection (DI) thorough the `@Injectable()` decorator. This marks the class as a provider so that they can be injected into other classes via constructor parameter injection:
+[NestJS](https://docs.nestjs.com/) is a framework used for building efficient and scalable server-side applications in Node.js. Architecturally, it is inspired from Angular by using modules to group related controllers, providers (services), and imports. The architecture is also layered, providing controllers (routes) which communicate to service layers for business logic and then finally the data acess layer (to access persistent storage). At its core, the Inversion of Control (IoC) principle allows for the framework to take care of injecting and instantiating dependencies inside our classes so we don't have to do it manually. This approach enables building applications in a modular and loosely coupled design. IoC is achieved in NestJS by using Dependency Injection (DI) thorough the `@Injectable()` decorator. This marks the class as a provider so that they can be injected into other classes via constructor parameter injection:
 ```
 // mark service class as injectable (provider)
 @Injectable()
@@ -55,7 +55,7 @@ The main application's service and module are inside the src/ folder; a controll
 
 ### Features
 1. Authentication
-- Defined in the auth module, where AuthService deals with the business logic and AuthController exposes the /login and /register endpoints. For authentication, the Passport library (@nestjs/passport) is used which abstracts the logic needed for veryfing the user's credentials using the local-startegy; additionally, we have also extended the authentication logic to include JWT, also done by the jwt-strategy.
+- Defined in the auth module, where AuthService deals with the business logic and AuthController exposes the /login and /register endpoints. For authentication, the Passport library (`@nestjs/passport`) is used which abstracts the logic needed for veryfing the user's credentials using the local-startegy; additionally, we have also extended the authentication logic to include JWT, also done by the jwt-strategy.
 - to protect our controller endpoints, we have used Guards. Guards have a single responsibility, checking whether a given request will be handled by the route handler or not, depending on certain conditions (JWT in our case). Guards invoke strategies which are responsible with extracting credentials, calling the validate() method  in case the verification of credentials is successful or throw unauthorized exceptions otherwise
 - it is also important to know that whatever validate() returns will be injected into the @Request request.user in our route handlers   
 - users authenticate in the app using an email and a passport; we are using the local-strategy in passport to verify the user's credentials by defining a validateUser method inside the AuthService class:
@@ -243,7 +243,7 @@ auth.controller.ts
     - findAllByUser(@Request() request)
     - async delete(id: number)
 
-These operations are provided to the React client through the controllers which call the underlying service classes. Our services use `Repository` class from typeORM which provides abstractions over basic methods like save, find, update and delete which allow us to not write the database queries by hand. A simple example of this is the create method in the users.service.ts class which uses the typeORM repository save() method to insert the new record in the database. This method is invoked in both the UsersController and the AuthController since both controllers have the AuthService as provider.  
+These operations are provided to the React client through the controllers which call the underlying service classes. Our services use `Repository` class from TypeORM (`@nestjs/typeorm`) which provides abstractions over basic methods like save(), find(), update() and delete() which allow us to not write the database queries by hand. A simple example of this is the create method in the users.service.ts class which uses the typeORM repository save() method to insert the new record in the database. This method is invoked in both the UsersController and the AuthController since both controllers have the AuthService as provider.
 ```
 users.service.ts
   async create(createUserDto: CreateUserDto) {
@@ -257,6 +257,7 @@ users.service.ts
 
 > The idea here is to allow users to use this PoC app as a pet management application; each user can register its cats and update their properties (like lastFed - the last time the cat was fed)
 3. Email notifications
+
 Notifications are send every day at 10 AM to remind users to feed their cats if they haven't done so already.
 This feature was implemented using task scheduling from `@nestjs/schedule`. The scheduler itself is a module that uses the SchedulerSerice service. This service is a simple service that calls the sendMails() method inside another MailerService class. Here, again, SchedulerModule has to import MailerModule and MailerModule needs to export MailerService so that nestJS can inject the dependencies.
 ```
